@@ -1,10 +1,24 @@
 # omnivoice-gfx1150
 
-**Running k2-fsa/OmniVoice voice-cloning TTS on an AMD Radeon 890M integrated GPU (gfx1150, Strix Point).**
+**Running k2-fsa/OmniVoice voice-cloning TTS on an AMD Radeon 890M integrated GPU (gfx1150 / Strix Point / Ryzen AI 9 HX 370 class).**
 
-First publicly documented instance, as far as I can find — prior work exists on gfx1151 (Strix Halo) for Chatterbox TTS, but not for the smaller Strix Point variant and not for OmniVoice specifically.
+As far as I can find across English-language GitHub, Medium, Reddit, HackerNews, Level1Techs, Phoronix, and English-indexed Chinese sources (Zhihu, Bilibili, CSDN), this repo is the shortest known path — **found by me** as of 2026-04-15 — to running k2-fsa/OmniVoice on this specific integrated GPU. If earlier work exists on Strix Point / gfx1150 specifically, I didn't locate it. Corrections welcome — if you have an earlier run, open an issue and I'll cite it here.
 
-This repo contains the benchmark script, the end-to-end report, and the step-by-step reproduction guide. It is not a fork of OmniVoice — it's the notes and data from getting OmniVoice to run on specific hardware that nobody else has published results on.
+This repo contains the benchmark script, the end-to-end report, and the step-by-step reproduction guide. It is not a fork of OmniVoice — it's the notes and data from getting OmniVoice to run on specific iGPU hardware.
+
+## Prior art I'm building on (acknowledgements)
+
+- **[k2-fsa/OmniVoice#67](https://github.com/k2-fsa/OmniVoice/issues/67)** — OmniVoice working on AMD ROCm generally was shown by **Alexander-Ger-Reich** on 2026-04-09, with **gunmaden** confirming on 2026-04-12. They used the `rocm.nightlies.amd.com/v2/gfx110X-all/` wheel index, which targets discrete RDNA3 (gfx1100/1101/1102 — RX 7600/7700/7800/7900 class). Different hardware class from Strix Point iGPU, but this is the work I'm building on and it disproves any "first OmniVoice on AMD" framing.
+- **[bkpaine — Voice Cloning on AMD Strix Halo (Chatterbox TTS)](https://medium.com/@bkpaine1/voice-cloning-on-amd-strix-halo-running-chatterbox-tts-with-native-gpu-acceleration-fa4a3db5e82c)**, March 2026 — the closest adjacent work I found for "voice cloning on AMD integrated graphics." Different TTS model (Chatterbox, not OmniVoice), different chip class (Strix Halo / gfx1151 / Radeon 8060S — ~55-120W APU, vs Strix Point / gfx1150 / Radeon 890M at ~15-54W). This is also where the `MIOPEN_FIND_MODE=FAST` workaround I use was first documented publicly for gfx1151.
+- **[Peterc3-dev/miopen-gfx1150](https://github.com/Peterc3-dev/miopen-gfx1150)** — my own earlier documentation of the three MIOpen bugs on gfx1150 that this project is rate-limited by.
+- **[Peterc3-dev/pytorch-gfx1150](https://github.com/Peterc3-dev/pytorch-gfx1150)** — my earlier source-built PyTorch wheel this project depends on.
+
+## What's specifically new in this repo
+
+- **Reproducible install recipe** for OmniVoice on Python 3.14 + source-built gfx1150 torch + the torchaudio `_IS_TORCHAUDIO_EXT_AVAILABLE=False` workaround (required because the Py3.14 torchaudio wheel is CUDA-linked and won't load against ROCm torch)
+- **Measured benchmarks** on a GPD Pocket 4 (Radeon 890M / HX 370): CPU baseline, GPU without workaround, GPU with `MIOPEN_FIND_MODE=FAST`. Published as a reference point for anyone else evaluating this chip for diffusion TTS work.
+- **Second production-shaped in-the-wild reproducer** for the MIOpen `GemmFwdRest` workspace=0 bug on gfx1150/1151-class hardware, contributed to the [miopen-gfx1150 repo](https://github.com/Peterc3-dev/miopen-gfx1150/blob/master/reproducers/2026-04-15-omnivoice-gfx1150.md) (first was TimLawrenz's NanoDiT gfx1151 training run)
+- **3.5× measured sustained speedup** over baseline via `MIOPEN_FIND_MODE=FAST` on this specific workload
 
 ## Hardware
 
