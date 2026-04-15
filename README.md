@@ -6,6 +6,36 @@ As far as I can find across English-language GitHub, Medium, Reddit, HackerNews,
 
 This repo contains the benchmark script, the end-to-end report, and the step-by-step reproduction guide. It is not a fork of OmniVoice — it's the notes and data from getting OmniVoice to run on specific iGPU hardware.
 
+## UPDATE 2026-04-15 — AMD staging wheels work, source build no longer necessary
+
+As of 2026-04-15, AMD is shipping gfx1150 PyTorch nightlies at `https://rocm.nightlies.amd.com/v2-staging/gfx1150/` (`torch 2.11.0+rocm7.13.0a20260415` at time of writing — wheels are getting updated daily). I tested them in a parallel venv on the same hardware and they **install cleanly, run faster than the source build, and most of the MIOpen workspace=0 pain is fixed upstream**. See [`STAGING-WHEELS-TEST.md`](STAGING-WHEELS-TEST.md) for the full benchmark data.
+
+**The current recommended install path** (skips the whole source build + torchaudio patch dance in the reproduction guide below):
+
+```bash
+python3.12 -m venv ~/omnivoice-env
+source ~/omnivoice-env/bin/activate
+pip install --upgrade pip
+pip install torch torchaudio \
+  --index-url https://rocm.nightlies.amd.com/v2-staging/gfx1150/ \
+  --extra-index-url https://pypi.org/simple
+cd ~
+git clone https://github.com/k2-fsa/OmniVoice.git
+cd OmniVoice
+pip install -e .
+export MIOPEN_FIND_MODE=FAST      # still recommended — zeros out the remaining workspace warnings
+export HSA_OVERRIDE_GFX_VERSION=11.5.0
+```
+
+That's it. No `.pth` file, no torchaudio patch, no Python 3.14 lock-in, no source compilation.
+
+**`REPRODUCTION-GUIDE.md` in this repo documents the OLDER source-build path** — it's kept as historical record of what was needed before AMD's staging wheels worked, but is **no longer the recommended path**. Use the 4-line install above instead.
+
+**Measured performance** on GPD Pocket 4 (Ryzen AI 9 HX 370, Radeon 890M) with the staging wheels:
+- Cold start: 44s for 20s of output audio
+- Warm cache: **41.5s for 20s of output audio** (faster than real-time)
+- MIOpen workspace warnings: **0 per generation with FAST mode** (was 40+ on ROCm 7.2)
+
 ## Prior art I'm building on (acknowledgements)
 
 - **[k2-fsa/OmniVoice#67](https://github.com/k2-fsa/OmniVoice/issues/67)** — OmniVoice working on AMD ROCm generally was shown by **Alexander-Ger-Reich** on 2026-04-09, with **gunmaden** confirming on 2026-04-12. They used the `rocm.nightlies.amd.com/v2/gfx110X-all/` wheel index, which targets discrete RDNA3 (gfx1100/1101/1102 — RX 7600/7700/7800/7900 class). Different hardware class from Strix Point iGPU, but this is the work I'm building on and it disproves any "first OmniVoice on AMD" framing.
