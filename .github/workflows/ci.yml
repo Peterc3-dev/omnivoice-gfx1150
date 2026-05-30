@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # Only lint + the pure-logic unit tests run in CI. The runtime deps
+      # (torch from AMD's gfx1150 index, omnivoice, model weights, a GPU) are
+      # NOT installed here — bench.py itself cannot run on CI hardware.
+      - name: Install dev tooling
+        run: pip install ruff pytest
+
+      - name: Ruff (static lint)
+        run: ruff check .
+
+      - name: Pytest (pure-logic unit tests only)
+        run: pytest -q tests

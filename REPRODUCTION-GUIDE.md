@@ -54,7 +54,7 @@ Instead of building a wheel, drop a `.pth` file into the venv's site-packages po
 
 ```bash
 SITE=$(python -c 'import site; print(site.getsitepackages()[0])')
-echo "/home/raz/builds/pytorch-gfx1150" > "$SITE/pytorch-gfx1150.pth"
+echo "$HOME/builds/pytorch-gfx1150" > "$SITE/pytorch-gfx1150.pth"
 ```
 
 **Verify import + GPU detection:**

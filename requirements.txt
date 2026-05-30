@@ -1,0 +1,9 @@
+# Runtime dependencies for bench.py.
+#
+# NOTE: torch must be installed from AMD's gfx1150 wheel index for this
+# hardware, NOT plain PyPI. See README.md for the install recipe:
+#   pip install torch --index-url https://rocm.nightlies.amd.com/v2-staging/gfx1150/
+# The pin below is the version reported working in REPORT.md; adjust to match
+# whichever gfx1150 wheel you install.
+torch>=2.11
+omnivoice @ git+https://github.com/k2-fsa/OmniVoice.git
