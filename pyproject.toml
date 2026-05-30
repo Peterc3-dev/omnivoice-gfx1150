@@ -1,0 +1,25 @@
+[project]
+name = "omnivoice-gfx1150"
+version = "0.1.0"
+description = "Benchmark and notes for running k2-fsa/OmniVoice TTS on AMD Radeon 890M (gfx1150)"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+
+# Runtime deps live in requirements.txt because torch must come from AMD's
+# gfx1150 wheel index, not PyPI. See README.md.
+
+[project.optional-dependencies]
+dev = ["ruff", "pytest"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+# E402 (import not at top) is intentional in bench.py: environment variables
+# must be set before torch is imported. Those imports carry per-line noqa.
+extend-select = ["I"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

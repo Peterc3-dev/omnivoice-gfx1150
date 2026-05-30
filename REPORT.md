@@ -18,7 +18,7 @@ Created `~/omnivoice-env` with `python3.14 -m venv`. Instead of rebuilding a whe
 python3.14 -m venv ~/omnivoice-env
 source ~/omnivoice-env/bin/activate
 pip install typing_extensions filelock sympy networkx jinja2 fsspec numpy
-echo "/home/raz/builds/pytorch-gfx1150" > $(python -c 'import site;print(site.getsitepackages()[0])')/pytorch-gfx1150.pth
+echo "$HOME/builds/pytorch-gfx1150" > $(python -c 'import site;print(site.getsitepackages()[0])')/pytorch-gfx1150.pth
 ```
 
 ## OmniVoice install
@@ -67,6 +67,6 @@ For reference, Piper CPU on the same hardware is ~25x realtime. OmniVoice GPU is
 - **Worth another pass after kernel/firmware update?** Yes, **only** if an update bumps MIOpen with a GemmFwdRest workspace query fix. Other kernel/firmware changes will not move the needle.
 
 ## Artifacts
-- Venv: `/home/raz/omnivoice-env/` (Python 3.14, torch 2.12.0a0+gitf86ea9e ROCm)
-- Bench script: `/home/raz/projects/omnivoice-gfx1150-test/bench.py`
+- Venv: `~/omnivoice-env/` (Python 3.14, torch 2.12.0a0+gitf86ea9e ROCm)
+- Bench script: `~/projects/omnivoice-gfx1150-test/bench.py`
 - Run: `source ~/omnivoice-env/bin/activate && python bench.py cuda:0 gpu` or `... cpu cpu`
